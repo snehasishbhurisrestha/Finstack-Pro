@@ -30,15 +30,20 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/game-entry', [GameEntryController::class, 'index'])->name('game-entry.index');
     Route::post('/game-entry', [GameEntryController::class, 'store'])->name('game-entry.store');
+    Route::put('/game-entry/{id}', [GameEntryController::class, 'update'])->name('game-entry.edit');
+    Route::delete('/game-entry/{id}', [GameEntryController::class, 'destroy'])->name('game-entry.destroy');
 
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
 
     Route::match(['get','post'], '/results', [ResultController::class, 'index'])->name('results.index');
+    Route::get('/results-history', [ResultController::class, 'history'])->name('results.history');
+    Route::get('/results-history/show/{result}', [ResultController::class, 'show'])->name('results.show');
 
     Route::get('/reports/single', [AnalyticsController::class, 'singleReport'])->name('reports.single');
     Route::get('/reports/single/agent-details',[AnalyticsController::class, 'singleAgentDetails'])->name('reports.single.agent.details');
 
     Route::get('/reports/patti', [AnalyticsController::class, 'pattiReport'])->name('reports.patti');
+    Route::get('/reports/patti/agent-details',[AnalyticsController::class, 'pattiAgentDetails'])->name('reports.patti.agent.details');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

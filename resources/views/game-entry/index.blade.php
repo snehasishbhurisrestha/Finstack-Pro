@@ -1,5 +1,5 @@
 @extends('layouts.app')
-
+@section('title','Game Entry')
 @section('style')
 <style>
     .entry-card{
@@ -86,24 +86,6 @@
 
         <div class="card-body">
 
-            {{-- BAJI --}}
-            {{-- <div class="mb-4 text-center">
-                @if($activeBaji)
-                    <span class="badge bg-success fs-5 px-4 py-3">
-                        Active Baji :
-                        {{ $activeBaji->name }}
-                        ({{ date('h:i A', strtotime($activeBaji->start_time)) }}
-                        -
-                        {{ date('h:i A', strtotime($activeBaji->end_time)) }})
-                    </span>
-                @else
-                    <span class="badge bg-danger fs-5 px-4 py-3">
-                        No Active Baji Now
-                    </span>
-                @endif
-            </div> --}}
-
-
             {{-- FORM --}}
             <form method="POST" action="{{ route('game-entry.store') }}">
                 @csrf
@@ -162,6 +144,13 @@
                             <label class="select-card w-100">
                                 <input type="radio" name="type" value="patti" required>
                                 Patti
+                            </label>
+                        </div>
+
+                        <div class="col-6 col-md-3">
+                            <label class="select-card w-100">
+                                <input type="radio" name="type" value="cp" required>
+                                CP
                             </label>
                         </div>
                     </div>
@@ -236,6 +225,7 @@
                             <th>Number</th>
                             <th>Amount</th>
                             <th>User</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
 
@@ -254,10 +244,34 @@
                                 </td>
                                 <td>₹{{ $entry->amount }}</td>
                                 <td>{{ $entry->employee->name }}</td>
+                                <td>
+                                    <div class="d-flex gap-1">
+
+                                        <button type="button"
+                                                class="btn btn-sm btn-warning edit-btn"
+                                                data-id="{{ $entry->id }}"
+                                                data-agent="{{ $entry->agent_id }}"
+                                                data-baji="{{ $entry->baji_id }}"
+                                                data-number="{{ $entry->game_number }}"
+                                                data-amount="{{ $entry->amount }}">
+                                            <i class="fa fa-edit"></i> Edit
+                                        </button>
+
+                                        <form action="{{ route('game-entry.destroy', $entry->id) }}" method="POST" class="delete-form d-inline">
+                                            @csrf
+                                            @method('DELETE')
+
+                                            <button type="submit" class="btn btn-sm btn-danger">
+                                                <i class="fa fa-trash"></i> Delete
+                                            </button>
+                                        </form>
+
+                                    </div>
+                                </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="text-center">
+                                <td colspan="7" class="text-center">
                                     No entries found
                                 </td>
                             </tr>
@@ -270,6 +284,52 @@
         </div>
     </div>
 
+</div>
+
+<div class="offcanvas offcanvas-end" tabindex="-1" id="editEntryCanvas">
+    <div class="offcanvas-header">
+        <h5>Edit Entry</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+    </div>
+
+    <div class="offcanvas-body">
+        <form id="editForm" method="POST">
+            @csrf
+            @method('PUT')
+
+            <div class="mb-3">
+                <label>Agent</label>
+                <select name="agent_id" id="edit_agent" class="form-select">
+                    @foreach($agents as $agent)
+                        <option value="{{ $agent->id }}">{{ $agent->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label>Baji</label>
+                <select name="baji_id" id="edit_baji" class="form-select">
+                    @foreach($bajis as $baji)
+                        <option value="{{ $baji->id }}">{{ $baji->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label>Game Number</label>
+                <input type="text" name="game_number" id="edit_number" class="form-control">
+            </div>
+
+            <div class="mb-3">
+                <label>Amount</label>
+                <input type="number" name="amount" id="edit_amount" class="form-control">
+            </div>
+
+            <button class="btn btn-primary w-100">
+                Update Entry
+            </button>
+        </form>
+    </div>
 </div>
 
 @endsection
@@ -292,6 +352,10 @@
 
             if (type === 'patti') {
                 return '123.456.789 or 123456789';
+            }
+
+            if (type === 'cp') {
+                return '1234.45678.789789...';
             }
 
             return 'Enter Number';
@@ -364,6 +428,38 @@
                 } else {
                     return value.length % 3 === 0;
                 }
+            }
+
+            if (type === 'cp') {
+                // only digits and dot
+                if (!/^[0-9.]+$/.test(value)) return false;
+
+                // prevent invalid dot placement
+                if (value.startsWith('.') || value.endsWith('.') || value.includes('..')) {
+                    return false;
+                }
+
+                let parts = value.split('.');
+
+                // check each part
+                return parts.every(part => {
+                    // length 4-7
+                    if (part.length < 4 || part.length > 7) return false;
+
+                    // ascending sequence check
+                    for (let i = 1; i < part.length; i++) {
+                        let prev = Number(part[i - 1]);
+                        let curr = Number(part[i]);
+
+                        let expected = (prev === 9) ? 0 : prev + 1;
+
+                        if (curr !== expected) {
+                            return false;
+                        }
+                    }
+
+                    return true;
+                });
             }
 
             return true;
@@ -483,6 +579,44 @@
             });
         });
 
+    });
+</script>
+<script>
+    $(document).on('submit', '.delete-form', function(e){
+        e.preventDefault();
+
+        let form = this;
+
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "This entry will be deleted permanently!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Yes, delete it!',
+            cancelButtonText: 'Cancel'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                form.submit();
+            }
+        });
+    });
+</script>
+<script>
+    $(document).on('click', '.edit-btn', function () {
+
+        let id = $(this).data('id');
+
+        $('#edit_agent').val($(this).data('agent'));
+        $('#edit_baji').val($(this).data('baji'));
+        $('#edit_number').val($(this).data('number'));
+        $('#edit_amount').val($(this).data('amount'));
+
+        $('#editForm').attr('action', '/game-entry/' + id);
+
+        let canvas = new bootstrap.Offcanvas('#editEntryCanvas');
+        canvas.show();
     });
 </script>
 @endsection

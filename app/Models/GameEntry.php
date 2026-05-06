@@ -11,6 +11,7 @@ class GameEntry extends Model
         'baji_id',
         'game_number',
         'amount',
+        'is_win',
         'entry_user_id'
     ];
 

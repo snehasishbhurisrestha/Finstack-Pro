@@ -192,6 +192,16 @@ class AnalyticsController extends Controller implements HasMiddleware
             $query->whereDate('game_entries.created_at', '<=', $request->date_to);
         }
 
+        if (
+            !$request->filled('date_from') &&
+            !$request->filled('date_to')
+        ) {
+            $query->whereDate(
+                'game_entries.created_at',
+                Carbon::today()
+            );
+        }
+
         if ($request->filled('baji_id')) {
             $query->where('baji_id', $request->baji_id);
         }
@@ -397,5 +407,64 @@ class AnalyticsController extends Controller implements HasMiddleware
             'agents' => Agent::orderBy('name')->get(),
             'bajis' => Baji::orderBy('id')->get(),
         ]);
+    }
+
+    public function pattiAgentDetails(Request $request)
+    {
+        $query = GameEntry::query()
+            ->whereRaw('CHAR_LENGTH(game_number)=3')
+            ->where('game_number', $request->number);
+
+        /*
+        |--------------------------------------------------------------------------
+        | SAME FILTERS
+        |--------------------------------------------------------------------------
+        */
+        if ($request->filled('date_from')) {
+            $query->whereDate('game_entries.created_at', '>=', $request->date_from);
+        }
+
+        if ($request->filled('date_to')) {
+            $query->whereDate('game_entries.created_at', '<=', $request->date_to);
+        }
+
+        if (
+            !$request->filled('date_from') &&
+            !$request->filled('date_to')
+        ) {
+            $query->whereDate(
+                'game_entries.created_at',
+                Carbon::today()
+            );
+        }
+
+        if ($request->filled('baji_id')) {
+            $query->where('baji_id', $request->baji_id);
+        }
+
+        if ($request->filled('agent_id')) {
+            $query->where('agent_id', $request->agent_id);
+        }
+
+        if ($request->filled('min_amount')) {
+            $query->where('amount', '>=', $request->min_amount);
+        }
+
+        if ($request->filled('max_amount')) {
+            $query->where('amount', '<=', $request->max_amount);
+        }
+
+        $data = $query
+            ->join('agents', 'agents.id', '=', 'game_entries.agent_id')
+            ->select(
+                'agents.name',
+                DB::raw('COUNT(*) as total_entry'),
+                DB::raw('SUM(amount) as total_amount')
+            )
+            ->groupBy('agents.id', 'agents.name')
+            ->orderByDesc('total_entry')
+            ->get();
+
+        return response()->json($data);
     }
 }

@@ -93,6 +93,10 @@ class GameEntryController extends Controller implements HasMiddleware
                     } elseif ($request->type == 'patti') {
                         // 123456789 → 123,456,789
                         $numbers = str_split($numberLine, 3);
+                    } elseif ($request->type == 'cp') {
+                        // 1234.5678.9012 → 1234,5678,9012
+                        $numbers = explode('.', $numberLine);
+
                     } else {
                         $numbers = [$numberLine];
                     }
@@ -132,5 +136,26 @@ class GameEntryController extends Controller implements HasMiddleware
                 $e->getMessage()
             );
         }
+    }
+
+    public function update(Request $request, $id)
+    {
+        $entry = GameEntry::findOrFail($id);
+
+        $entry->update([
+            'agent_id' => $request->agent_id,
+            'baji_id' => $request->baji_id,
+            'game_number' => $request->game_number,
+            'amount' => $request->amount,
+        ]);
+
+        return back()->with('success', 'Entry updated successfully');
+    }
+
+    public function destroy($id)
+    {
+        GameEntry::findOrFail($id)->delete();
+
+        return back()->with('success', 'Entry deleted successfully');
     }
 }

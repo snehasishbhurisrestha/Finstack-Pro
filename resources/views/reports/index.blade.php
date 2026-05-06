@@ -1,5 +1,5 @@
 @extends('layouts.app')
-
+@section('title','Entry Report')
 @section('content')
 <div class="container-fluid">
 
@@ -22,14 +22,14 @@
                     <div class="col-lg-2 col-md-4 col-6">
                         <input type="date"
                                name="date_from"
-                               value="{{ request('date_from') }}"
+                               value="{{ old('date_from', request('date_from')) }}"
                                class="form-control">
                     </div>
 
                     <div class="col-lg-2 col-md-4 col-6">
                         <input type="date"
                                name="date_to"
-                               value="{{ request('date_to') }}"
+                               value="{{ old('date_to', request('date_to')) }}"
                                class="form-control">
                     </div>
 
@@ -37,8 +37,7 @@
                         <select name="baji_id" class="form-select">
                             <option value="">All Baji</option>
                             @foreach($bajis as $baji)
-                                <option value="{{ $baji->id }}"
-                                    @selected(request('baji_id')==$baji->id)>
+                                <option value="{{ $baji->id }}" {{ old('baji_id', request('baji_id')) == $baji->id ? 'selected' : '' }}>
                                     {{ $baji->name }}
                                 </option>
                             @endforeach
@@ -49,8 +48,7 @@
                         <select name="agent_id" class="form-select">
                             <option value="">All Agent</option>
                             @foreach($agents as $agent)
-                                <option value="{{ $agent->id }}"
-                                    @selected(request('agent_id')==$agent->id)>
+                                <option value="{{ $agent->id }}" {{ old('agent_id', request('agent_id')) == $agent->id ? 'selected' : '' }}>
                                     {{ $agent->name }}
                                 </option>
                             @endforeach
@@ -60,7 +58,7 @@
                     <div class="col-lg-2 col-md-4 col-6">
                         <input type="text"
                                name="game_number"
-                               value="{{ request('game_number') }}"
+                               value="{{ old('game_number', request('game_number')) }}"
                                placeholder="Game Number"
                                class="form-control">
                     </div>
@@ -68,35 +66,35 @@
                     <div class="col-lg-2 col-md-4 col-6">
                         <select name="sort" class="form-select">
                             <option value="">Latest</option>
-                            <option value="amount_asc" @selected(request('sort')=='amount_asc')>Amount ASC</option>
-                            <option value="amount_desc" @selected(request('sort')=='amount_desc')>Amount DESC</option>
-                            <option value="number_asc" @selected(request('sort')=='number_asc')>Number ASC</option>
-                            <option value="number_desc" @selected(request('sort')=='number_desc')>Number DESC</option>
+                            <option value="amount_asc" {{ old('sort', request('sort')) == 'amount_asc' ? 'selected' : '' }}>Amount ASC</option>
+                            <option value="amount_desc" {{ old('sort', request('sort')) == 'amount_desc' ? 'selected' : '' }}>Amount DESC</option>
+                            <option value="number_asc" {{ old('sort', request('sort')) == 'number_asc' ? 'selected' : '' }}>Number ASC</option>
+                            <option value="number_desc" {{ old('sort', request('sort')) == 'number_desc' ? 'selected' : '' }}>Number DESC</option>
                         </select>
                     </div>
 
                     <div class="col-lg-2 col-md-4 col-6">
                         <input type="number"
-                               name="min_amount"
-                               value="{{ request('min_amount') }}"
-                               placeholder="Min Amount"
-                               class="form-control">
+                            name="min_amount"
+                            value="{{ old('min_amount', request('min_amount')) }}"
+                            placeholder="Min Amount"
+                            class="form-control">
                     </div>
 
                     <div class="col-lg-2 col-md-4 col-6">
                         <input type="number"
-                               name="max_amount"
-                               value="{{ request('max_amount') }}"
-                               placeholder="Max Amount"
-                               class="form-control">
+                            name="max_amount"
+                            value="{{ old('max_amount', request('max_amount')) }}"
+                            placeholder="Max Amount"
+                            class="form-control">
                     </div>
 
                     <div class="col-lg-2 col-md-4 col-6">
                         <input type="number"
-                               name="big_amount"
-                               value="{{ $bigAmount }}"
-                               placeholder="Big Bet"
-                               class="form-control">
+                            name="big_amount"
+                            value="{{ old('big_amount', request('big_amount')) }}"
+                            placeholder="Big Bet"
+                            class="form-control">
                     </div>
 
                     <div class="col-lg-2 col-md-4 col-6">

@@ -7,7 +7,8 @@
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <link href="{{ asset('assets/admin/images/logo/favicon.png') }}" rel="icon" type="image/x-icon">
     <link href="{{ asset('assets/admin/images/logo/favicon.png') }}" rel="shortcut icon" type="image/x-icon">
-    <title>{{ config('app.name', 'Laravel') }}</title>
+
+    <title>@yield('title') | {{ config('app.name', 'Laravel') }}</title>
 
     <!-- Animation css -->
     <link href="{{ asset('assets/admin/vendor/animation/animate.min.css') }}" rel="stylesheet">

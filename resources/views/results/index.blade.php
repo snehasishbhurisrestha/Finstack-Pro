@@ -1,5 +1,5 @@
 @extends('layouts.app')
-
+@section('title','Result Check')
 @section('content')
 <div class="container-fluid py-3">
 
@@ -21,8 +21,7 @@
                         <select name="baji_id" class="form-select" required>
                             <option value="">Choose Baji</option>
                             @foreach($bajis as $baji)
-                                <option value="{{ $baji->id }}"
-                                    @selected(old('baji_id') == $baji->id)>
+                                <option value="{{ $baji->id }}" {{ old('baji_id', request('baji_id')) == $baji->id ? 'selected' : '' }}>
                                     {{ $baji->name }}
                                 </option>
                             @endforeach
@@ -36,16 +35,32 @@
                                maxlength="3"
                                minlength="3"
                                pattern="[0-9]{3}"
-                               value="{{ old('patti') }}"
+                               value="{{ old('patti', request('patti')) }}"
                                class="form-control"
                                placeholder="578"
                                required>
                     </div>
 
+                    <input type="hidden" name="action_type" id="action_type" value="check">
+
                     <div class="col-lg-4">
-                        <button class="btn btn-success w-100">
-                            CHECK RESULT
-                        </button>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <button type="submit"
+                                        onclick="$('#action_type').val('check')"
+                                        class="btn btn-success w-100">
+                                    CHECK RESULT
+                                </button>
+                            </div>
+
+                            <div class="col-6">
+                                <button type="button"
+                                        id="submitResultBtn"
+                                        class="btn btn-warning w-100">
+                                    SUBMIT RESULT
+                                </button>
+                            </div>
+                        </div>
                     </div>
 
                 </div>
@@ -61,7 +76,7 @@
         {{-- RESULT HEADER --}}
         <div class="row g-3 mb-4">
 
-            <div class="col-md-3 col-6">
+            <div class="col-md-2 col-6">
                 <div class="card border-0 shadow-sm text-center">
                     <div class="card-body">
                         <small>Winning Patti</small>
@@ -72,13 +87,27 @@
                 </div>
             </div>
 
-            <div class="col-md-3 col-6">
+            <div class="col-md-2 col-6">
                 <div class="card border-0 shadow-sm text-center">
                     <div class="card-body">
                         <small>Winning Single</small>
                         <h2 class="mb-0 text-success">
                             {{ $result['single'] }}
                         </h2>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-2 col-6">
+                <div class="card border-0 shadow-sm text-center">
+                    <div class="card-body">
+                        <small>CP Win Amount</small>
+                        <h4 class="mb-0 text-warning">
+                            ₹{{ number_format($result['cpAmount'],2) }}
+                        </h4>
+                        <small>
+                            {{ $result['cpCount'] }} entries
+                        </small>
                     </div>
                 </div>
             </div>
@@ -124,6 +153,7 @@
                             <th>Agent</th>
                             <th>Patti Amount</th>
                             <th>Single Amount</th>
+                            <th>CP Amount</th>
                             <th>Total Entry</th>
                             <th>Total Win</th>
                         </tr>
@@ -134,6 +164,7 @@
                                 <td><b>{{ $row->name }}</b></td>
                                 <td>₹{{ number_format($row->patti_amount,2) }}</td>
                                 <td>₹{{ number_format($row->single_amount,2) }}</td>
+                                <td>₹{{ number_format($row->cp_amount,2) }}</td>
                                 <td>{{ $row->total_entry }}</td>
                                 <td class="fw-bold text-danger">
                                     ₹{{ number_format($row->total_amount,2) }}
@@ -207,4 +238,26 @@
     @endif
 
 </div>
+@endsection
+
+@section('script')
+<script>
+    $('#submitResultBtn').on('click', function () {
+        Swal.fire({
+            title: 'Confirm Result Submit?',
+            text: 'Are you checked the result?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, Submit',
+            cancelButtonText: 'No',
+            confirmButtonColor: '#198754',
+            cancelButtonColor: '#dc3545',
+        }).then((res) => {
+            if (res.isConfirmed) {
+                $('#action_type').val('submit');
+                $(this).closest('form').submit();
+            }
+        });
+    });
+</script>
 @endsection

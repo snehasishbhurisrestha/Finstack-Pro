@@ -1,5 +1,5 @@
 @extends('layouts.app')
-
+@section('title','Agent Edit')
 @section('content')
 <div class="container-fluid">
 <div class="card">

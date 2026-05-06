@@ -1,5 +1,5 @@
 @extends('layouts.app')
-
+@section('title','Patti Report')
 @section('content')
 <div class="container-fluid py-3">
 
@@ -11,16 +11,16 @@
 
                     <div class="col-lg-2 col-md-4 col-6">
                         <input type="date"
-                               name="date_from"
-                               value="{{ request('date_from') }}"
-                               class="form-control">
+                            name="date_from"
+                            value="{{ old('date_from', request('date_from')) }}"
+                            class="form-control">
                     </div>
 
                     <div class="col-lg-2 col-md-4 col-6">
                         <input type="date"
-                               name="date_to"
-                               value="{{ request('date_to') }}"
-                               class="form-control">
+                            name="date_to"
+                            value="{{ old('date_to', request('date_to')) }}"
+                            class="form-control">
                     </div>
 
                     <div class="col-lg-2 col-md-4 col-6">
@@ -28,7 +28,7 @@
                             <option value="">All Baji</option>
                             @foreach($bajis as $baji)
                                 <option value="{{ $baji->id }}"
-                                    @selected(request('baji_id')==$baji->id)>
+                                    {{ old('baji_id', request('baji_id')) == $baji->id ? 'selected' : '' }}>
                                     {{ $baji->name }}
                                 </option>
                             @endforeach
@@ -40,7 +40,7 @@
                             <option value="">All Agent</option>
                             @foreach($agents as $agent)
                                 <option value="{{ $agent->id }}"
-                                    @selected(request('agent_id')==$agent->id)>
+                                    {{ old('agent_id', request('agent_id')) == $agent->id ? 'selected' : '' }}>
                                     {{ $agent->name }}
                                 </option>
                             @endforeach
@@ -49,36 +49,36 @@
 
                     <div class="col-lg-2 col-md-4 col-6">
                         <input type="text"
-                               name="game_number"
-                               value="{{ request('game_number') }}"
-                               placeholder="Search Patti"
-                               class="form-control">
+                            name="game_number"
+                            value="{{ old('game_number', request('game_number')) }}"
+                            placeholder="Search Patti"
+                            class="form-control">
                     </div>
 
                     <div class="col-lg-2 col-md-4 col-6">
                         <input type="number"
-                               name="min_amount"
-                               value="{{ request('min_amount') }}"
-                               placeholder="Min Amount"
-                               class="form-control">
+                            name="min_amount"
+                            value="{{ old('min_amount', request('min_amount')) }}"
+                            placeholder="Min Amount"
+                            class="form-control">
                     </div>
 
                     <div class="col-lg-2 col-md-4 col-6">
                         <input type="number"
-                               name="max_amount"
-                               value="{{ request('max_amount') }}"
-                               placeholder="Max Amount"
-                               class="form-control">
+                            name="max_amount"
+                            value="{{ old('max_amount', request('max_amount')) }}"
+                            placeholder="Max Amount"
+                            class="form-control">
                     </div>
 
                     <div class="col-lg-2 col-md-4 col-6">
                         <select name="sort" class="form-select">
                             <option value="">Most Played</option>
-                            <option value="number_asc" @selected(request('sort')=='number_asc')>Number ASC</option>
-                            <option value="number_desc" @selected(request('sort')=='number_desc')>Number DESC</option>
-                            <option value="amount_asc" @selected(request('sort')=='amount_asc')>Amount ASC</option>
-                            <option value="amount_desc" @selected(request('sort')=='amount_desc')>Amount DESC</option>
-                            <option value="entry_asc" @selected(request('sort')=='entry_asc')>Entry ASC</option>
+                            <option value="number_asc" {{ old('sort', request('sort')) == 'number_asc' ? 'selected' : '' }}>Number ASC</option>
+                            <option value="number_desc" {{ old('sort', request('sort')) == 'number_desc' ? 'selected' : '' }}>Number DESC</option>
+                            <option value="amount_asc" {{ old('sort', request('sort')) == 'amount_asc' ? 'selected' : '' }}>Amount ASC</option>
+                            <option value="amount_desc" {{ old('sort', request('sort')) == 'amount_desc' ? 'selected' : '' }}>Amount DESC</option>
+                            <option value="entry_asc" {{ old('sort', request('sort')) == 'entry_asc' ? 'selected' : '' }}>Entry ASC</option>
                         </select>
                     </div>
 
@@ -90,7 +90,7 @@
 
                     <div class="col-lg-2 col-md-4 col-6">
                         <a href="{{ route('reports.patti') }}"
-                           class="btn btn-secondary w-100">
+                        class="btn btn-secondary w-100">
                             Reset
                         </a>
                     </div>
@@ -188,7 +188,7 @@
                 </thead>
                 <tbody>
                     @forelse($report as $row)
-                        <tr>
+                        <tr class="single-row" data-number="{{ $row->game_number }}" style="cursor:pointer">
                             <td>
                                 <span class="badge bg-success fs-6 px-3 py-2">
                                     {{ $row->game_number }}
@@ -211,6 +211,125 @@
             </table>
         </div>
     </div>
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="agentCanvas" style="width:500px;">
 
+        <div class="offcanvas-header border-bottom">
+            <h5 class="offcanvas-title">
+                Agent Details :
+                <span id="selectedNumber"
+                    class="badge bg-primary"></span>
+            </h5>
+
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="offcanvas"></button>
+        </div>
+
+        <div class="offcanvas-body p-0">
+
+            <div id="agentLoader"
+                class="text-center p-4 d-none">
+                Loading...
+            </div>
+
+            <div id="agentBody"></div>
+
+        </div>
+    </div>
 </div>
+@endsection
+
+@section('script')
+<script>
+    $(document).on('click', '.single-row', function () {
+
+        let number = $(this).data('number');
+
+        $('#selectedNumber').text(number);
+        $('#agentLoader').removeClass('d-none');
+        $('#agentBody').html('');
+
+        let canvas = new bootstrap.Offcanvas(
+            document.getElementById('agentCanvas')
+        );
+
+        canvas.show();
+
+        $.get("{{ route('reports.patti.agent.details') }}", {
+            number: number,
+            date_from: "{{ request('date_from') }}",
+            date_to: "{{ request('date_to') }}",
+            baji_id: "{{ request('baji_id') }}",
+            agent_id: "{{ request('agent_id') }}",
+            min_amount: "{{ request('min_amount') }}",
+            max_amount: "{{ request('max_amount') }}"
+        }, function(res){
+
+            $('#agentLoader').addClass('d-none');
+
+            let html = `
+                <table class="table table-bordered table-hover mb-0">
+                    <thead class="table-light sticky-top">
+                        <tr>
+                            <th>Agent</th>
+                            <th>Entry</th>
+                            <th>Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            let totalEntry = 0;
+            let totalAmount = 0;
+
+            if(res.length === 0){
+
+                html += `
+                    <tr>
+                        <td colspan="3"
+                            class="text-center text-muted py-4">
+                            No data found
+                        </td>
+                    </tr>
+                `;
+
+            } else {
+
+                res.forEach(row => {
+
+                    totalEntry += Number(row.total_entry);
+                    totalAmount += Number(row.total_amount);
+
+                    html += `
+                        <tr>
+                            <td>${row.name}</td>
+                            <td>${row.total_entry}</td>
+                            <td class="fw-bold">
+                                ₹${Number(row.total_amount).toFixed(2)}
+                            </td>
+                        </tr>
+                    `;
+                });
+
+                /* footer total */
+                html += `
+                    <tr class="table-dark sticky-bottom">
+                        <th>Total</th>
+                        <th>${totalEntry}</th>
+                        <th>₹${totalAmount.toFixed(2)}</th>
+                    </tr>
+                `;
+            }
+
+            html += `
+                    </tbody>
+                </table>
+            `;
+
+            $('#agentBody').html(html);
+
+        });
+
+    });
+</script>
 @endsection

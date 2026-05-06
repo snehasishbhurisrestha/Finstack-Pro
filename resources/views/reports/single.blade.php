@@ -1,5 +1,5 @@
 @extends('layouts.app')
-
+@section('title','Single Report')
 @section('content')
 <div class="container-fluid py-3">
 
@@ -11,16 +11,16 @@
 
                     <div class="col-lg-2 col-md-4 col-6">
                         <input type="date"
-                               name="date_from"
-                               value="{{ request('date_from') }}"
-                               class="form-control">
+                            name="date_from"
+                            value="{{ old('date_from', request('date_from')) }}"
+                            class="form-control">
                     </div>
 
                     <div class="col-lg-2 col-md-4 col-6">
                         <input type="date"
-                               name="date_to"
-                               value="{{ request('date_to') }}"
-                               class="form-control">
+                            name="date_to"
+                            value="{{ old('date_to', request('date_to')) }}"
+                            class="form-control">
                     </div>
 
                     <div class="col-lg-2 col-md-4 col-6">
@@ -28,7 +28,7 @@
                             <option value="">All Baji</option>
                             @foreach($bajis as $baji)
                                 <option value="{{ $baji->id }}"
-                                    @selected(request('baji_id')==$baji->id)>
+                                    {{ old('baji_id', request('baji_id')) == $baji->id ? 'selected' : '' }}>
                                     {{ $baji->name }}
                                 </option>
                             @endforeach
@@ -40,7 +40,7 @@
                             <option value="">All Agent</option>
                             @foreach($agents as $agent)
                                 <option value="{{ $agent->id }}"
-                                    @selected(request('agent_id')==$agent->id)>
+                                    {{ old('agent_id', request('agent_id')) == $agent->id ? 'selected' : '' }}>
                                     {{ $agent->name }}
                                 </option>
                             @endforeach
@@ -49,27 +49,27 @@
 
                     <div class="col-lg-2 col-md-4 col-6">
                         <input type="number"
-                               name="min_amount"
-                               value="{{ request('min_amount') }}"
-                               placeholder="Min Amount"
-                               class="form-control">
+                            name="min_amount"
+                            value="{{ old('min_amount', request('min_amount')) }}"
+                            placeholder="Min Amount"
+                            class="form-control">
                     </div>
 
                     <div class="col-lg-2 col-md-4 col-6">
                         <input type="number"
-                               name="max_amount"
-                               value="{{ request('max_amount') }}"
-                               placeholder="Max Amount"
-                               class="form-control">
+                            name="max_amount"
+                            value="{{ old('max_amount', request('max_amount')) }}"
+                            placeholder="Max Amount"
+                            class="form-control">
                     </div>
 
                     <div class="col-lg-2 col-md-4 col-6">
                         <select name="sort" class="form-select">
                             <option value="">Default</option>
-                            <option value="amount_asc" @selected(request('sort')=='amount_asc')>Amount ASC</option>
-                            <option value="amount_desc" @selected(request('sort')=='amount_desc')>Amount DESC</option>
-                            <option value="entry_asc" @selected(request('sort')=='entry_asc')>Entry ASC</option>
-                            <option value="entry_desc" @selected(request('sort')=='entry_desc')>Entry DESC</option>
+                            <option value="amount_asc" {{ old('sort', request('sort')) == 'amount_asc' ? 'selected' : '' }}>Amount ASC</option>
+                            <option value="amount_desc" {{ old('sort', request('sort')) == 'amount_desc' ? 'selected' : '' }}>Amount DESC</option>
+                            <option value="entry_asc" {{ old('sort', request('sort')) == 'entry_asc' ? 'selected' : '' }}>Entry ASC</option>
+                            <option value="entry_desc" {{ old('sort', request('sort')) == 'entry_desc' ? 'selected' : '' }}>Entry DESC</option>
                         </select>
                     </div>
 
@@ -81,7 +81,7 @@
 
                     <div class="col-lg-2 col-md-4 col-6">
                         <a href="{{ route('reports.single') }}"
-                           class="btn btn-secondary w-100">
+                        class="btn btn-secondary w-100">
                             Reset
                         </a>
                     </div>
@@ -201,95 +201,95 @@
 
 @section('script')
 <script>
-$(document).on('click', '.single-row', function () {
+    $(document).on('click', '.single-row', function () {
 
-    let number = $(this).data('number');
+        let number = $(this).data('number');
 
-    $('#selectedNumber').text(number);
-    $('#agentLoader').removeClass('d-none');
-    $('#agentBody').html('');
+        $('#selectedNumber').text(number);
+        $('#agentLoader').removeClass('d-none');
+        $('#agentBody').html('');
 
-    let canvas = new bootstrap.Offcanvas(
-        document.getElementById('agentCanvas')
-    );
+        let canvas = new bootstrap.Offcanvas(
+            document.getElementById('agentCanvas')
+        );
 
-    canvas.show();
+        canvas.show();
 
-    $.get("{{ route('reports.single.agent.details') }}", {
-        number: number,
-        date_from: "{{ request('date_from') }}",
-        date_to: "{{ request('date_to') }}",
-        baji_id: "{{ request('baji_id') }}",
-        agent_id: "{{ request('agent_id') }}",
-        min_amount: "{{ request('min_amount') }}",
-        max_amount: "{{ request('max_amount') }}"
-    }, function(res){
+        $.get("{{ route('reports.single.agent.details') }}", {
+            number: number,
+            date_from: "{{ request('date_from') }}",
+            date_to: "{{ request('date_to') }}",
+            baji_id: "{{ request('baji_id') }}",
+            agent_id: "{{ request('agent_id') }}",
+            min_amount: "{{ request('min_amount') }}",
+            max_amount: "{{ request('max_amount') }}"
+        }, function(res){
 
-        $('#agentLoader').addClass('d-none');
+            $('#agentLoader').addClass('d-none');
 
-        let html = `
-            <table class="table table-bordered table-hover mb-0">
-                <thead class="table-light sticky-top">
-                    <tr>
-                        <th>Agent</th>
-                        <th>Entry</th>
-                        <th>Amount</th>
-                    </tr>
-                </thead>
-                <tbody>
-        `;
-
-        let totalEntry = 0;
-        let totalAmount = 0;
-
-        if(res.length === 0){
-
-            html += `
-                <tr>
-                    <td colspan="3"
-                        class="text-center text-muted py-4">
-                        No data found
-                    </td>
-                </tr>
+            let html = `
+                <table class="table table-bordered table-hover mb-0">
+                    <thead class="table-light sticky-top">
+                        <tr>
+                            <th>Agent</th>
+                            <th>Entry</th>
+                            <th>Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
             `;
 
-        } else {
+            let totalEntry = 0;
+            let totalAmount = 0;
 
-            res.forEach(row => {
-
-                totalEntry += Number(row.total_entry);
-                totalAmount += Number(row.total_amount);
+            if(res.length === 0){
 
                 html += `
                     <tr>
-                        <td>${row.name}</td>
-                        <td>${row.total_entry}</td>
-                        <td class="fw-bold">
-                            ₹${Number(row.total_amount).toFixed(2)}
+                        <td colspan="3"
+                            class="text-center text-muted py-4">
+                            No data found
                         </td>
                     </tr>
                 `;
-            });
 
-            /* footer total */
+            } else {
+
+                res.forEach(row => {
+
+                    totalEntry += Number(row.total_entry);
+                    totalAmount += Number(row.total_amount);
+
+                    html += `
+                        <tr>
+                            <td>${row.name}</td>
+                            <td>${row.total_entry}</td>
+                            <td class="fw-bold">
+                                ₹${Number(row.total_amount).toFixed(2)}
+                            </td>
+                        </tr>
+                    `;
+                });
+
+                /* footer total */
+                html += `
+                    <tr class="table-dark sticky-bottom">
+                        <th>Total</th>
+                        <th>${totalEntry}</th>
+                        <th>₹${totalAmount.toFixed(2)}</th>
+                    </tr>
+                `;
+            }
+
             html += `
-                <tr class="table-dark sticky-bottom">
-                    <th>Total</th>
-                    <th>${totalEntry}</th>
-                    <th>₹${totalAmount.toFixed(2)}</th>
-                </tr>
+                    </tbody>
+                </table>
             `;
-        }
 
-        html += `
-                </tbody>
-            </table>
-        `;
+            $('#agentBody').html(html);
 
-        $('#agentBody').html(html);
+        });
 
     });
-
-});
 </script>
 @endsection
