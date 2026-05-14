@@ -225,6 +225,7 @@
                                     <th>Baji</th>
                                     <th>Number</th>
                                     <th>Amount</th>
+                                    <th>Is Win</th>
                                     <th>Entry By</th>
                                 </tr>
                             </thead>
@@ -236,6 +237,9 @@
                                         <td>{{ $entry->baji->name ?? '-' }}</td>
                                         <td><b>{{ $entry->game_number }}</b></td>
                                         <td>₹{{ $entry->amount }}</td>
+                                        <td @if($entry->is_win) class="text-success" @else class="text-danger" @endif>
+                                            <b>{{ $entry->is_win ? 'Win' : 'Not Win' }}</b>
+                                        </td>
                                         <td>{{ $entry->employee->name ?? '-' }}</td>
                                     </tr>
                                 @empty
