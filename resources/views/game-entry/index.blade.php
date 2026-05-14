@@ -430,37 +430,37 @@
                 }
             }
 
-            if (type === 'cp') {
-                // only digits and dot
-                if (!/^[0-9.]+$/.test(value)) return false;
+            // if (type === 'cp') {
+            //     // only digits and dot
+            //     if (!/^[0-9.]+$/.test(value)) return false;
 
-                // prevent invalid dot placement
-                if (value.startsWith('.') || value.endsWith('.') || value.includes('..')) {
-                    return false;
-                }
+            //     // prevent invalid dot placement
+            //     if (value.startsWith('.') || value.endsWith('.') || value.includes('..')) {
+            //         return false;
+            //     }
 
-                let parts = value.split('.');
+            //     let parts = value.split('.');
 
-                // check each part
-                return parts.every(part => {
-                    // length 4-7
-                    if (part.length < 4 || part.length > 7) return false;
+            //     // check each part
+            //     return parts.every(part => {
+            //         // length 4-7
+            //         if (part.length < 4 || part.length > 7) return false;
 
-                    // ascending sequence check
-                    for (let i = 1; i < part.length; i++) {
-                        let prev = Number(part[i - 1]);
-                        let curr = Number(part[i]);
+            //         // ascending sequence check
+            //         for (let i = 1; i < part.length; i++) {
+            //             let prev = Number(part[i - 1]);
+            //             let curr = Number(part[i]);
 
-                        let expected = (prev === 9) ? 0 : prev + 1;
+            //             let expected = (prev === 9) ? 0 : prev + 1;
 
-                        if (curr !== expected) {
-                            return false;
-                        }
-                    }
+            //             if (curr !== expected) {
+            //                 return false;
+            //             }
+            //         }
 
-                    return true;
-                });
-            }
+            //         return true;
+            //     });
+            // }
 
             return true;
         }

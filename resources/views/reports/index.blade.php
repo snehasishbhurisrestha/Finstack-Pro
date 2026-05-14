@@ -56,6 +56,22 @@
                     </div>
 
                     <div class="col-lg-2 col-md-4 col-6">
+                        <select name="game_type" class="form-select">
+                            <option value="">All Type</option>
+
+                            <option value="single"
+                                {{ request('game_type') == 'single' ? 'selected' : '' }}>
+                                Single
+                            </option>
+
+                            <option value="patti"
+                                {{ request('game_type') == 'patti' ? 'selected' : '' }}>
+                                Patti
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="col-lg-2 col-md-4 col-6">
                         <input type="text"
                                name="game_number"
                                value="{{ old('game_number', request('game_number')) }}"

@@ -221,6 +221,28 @@ class ReportController extends Controller implements HasMiddleware
                 );
             }
 
+            /*
+            |--------------------------------------------------------------------------
+            | GAME TYPE FILTER
+            |--------------------------------------------------------------------------
+            */
+            if ($request->filled('game_type')) {
+
+                // SINGLE = 1 digit
+                if ($request->game_type == 'single') {
+
+                    $query->whereRaw('CHAR_LENGTH(game_entries.game_number)=1');
+
+                }
+
+                // PATTI = 3 digit
+                if ($request->game_type == 'patti') {
+
+                    $query->whereRaw('CHAR_LENGTH(game_entries.game_number)=3');
+
+                }
+            }
+
             if ($request->filled('date_from')) {
                 $query->whereDate(
                     'game_entries.created_at',
