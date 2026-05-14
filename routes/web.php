@@ -33,6 +33,9 @@ Route::middleware('auth')->group(function () {
     Route::put('/game-entry/{id}', [GameEntryController::class, 'update'])->name('game-entry.edit');
     Route::delete('/game-entry/{id}', [GameEntryController::class, 'destroy'])->name('game-entry.destroy');
 
+    Route::get('/game-entry/bulk-list', [GameEntryController::class, 'bulkList'])->name('game-entry.bulk-list');
+    Route::post('/game-entry/bulk-update', [GameEntryController::class, 'bulkUpdate'])->name('game-entry.bulk-update');
+
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
 
     Route::match(['get','post'], '/results', [ResultController::class, 'index'])->name('results.index');

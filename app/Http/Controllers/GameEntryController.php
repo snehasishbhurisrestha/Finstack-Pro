@@ -158,4 +158,52 @@ class GameEntryController extends Controller implements HasMiddleware
 
         return back()->with('success', 'Entry deleted successfully');
     }
+
+    public function bulkList(Request $request)
+    {
+        $entries = GameEntry::with(['agent', 'baji'])
+            ->whereBetween('created_at', [
+                $request->from,
+                $request->to
+            ])
+            ->latest()
+            ->get();
+
+        return response()->json($entries);
+    }
+
+    public function bulkUpdate(Request $request)
+    {
+        if (!$request->entry_ids) {
+            return back()->with('error', 'No entries selected');
+        }
+
+        $updateData = [];
+
+        // ONLY UPDATE AGENT IF SELECTED
+        if ($request->filled('agent_id')) {
+            $updateData['agent_id'] = $request->agent_id;
+        }
+
+        // ONLY UPDATE BAJI IF SELECTED
+        if ($request->filled('baji_id')) {
+            $updateData['baji_id'] = $request->baji_id;
+        }
+
+        // NOTHING SELECTED
+        if (empty($updateData)) {
+            return back()->with(
+                'error',
+                'Please select Agent or Baji to update'
+            );
+        }
+
+        GameEntry::whereIn('id', $request->entry_ids)
+            ->update($updateData);
+
+        return back()->with(
+            'success',
+            count($request->entry_ids) . ' entries updated successfully'
+        );
+    }
 }

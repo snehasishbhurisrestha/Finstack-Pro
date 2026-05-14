@@ -208,8 +208,12 @@
 
     {{-- LAST 50 --}}
     <div class="card shadow-sm border-0">
-        <div class="card-header">
-            <h5 class="mb-0">Latest 50 Entries</h5>
+        <div class="card-header d-flex flex-column align-items-center justify-content-center">
+            <h5 class="mb-2">Latest 50 Entries</h5>
+            <button class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#bulkEditModal">
+                <i class="fa fa-edit"></i>
+                Bulk Edit By Time
+            </button>
         </div>
 
         <div class="card-body p-0">
@@ -332,6 +336,131 @@
     </div>
 </div>
 
+<div class="modal fade" id="bulkEditModal">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    Bulk Edit Entries
+                </h5>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal">
+                </button>
+            </div>
+
+            <div class="modal-body">
+
+                {{-- SEARCH --}}
+                <div class="row g-2 mb-3">
+
+                    <div class="col-md-5">
+                        <input type="datetime-local"
+                            id="bulk_from"
+                            class="form-control"
+                            value="{{ now()->format('Y-m-d\TH:i') }}">
+                    </div>
+
+                    <div class="col-md-5">
+                        <input type="datetime-local"
+                            id="bulk_to"
+                            class="form-control"
+                            value="{{ now()->format('Y-m-d\TH:i') }}">
+                    </div>
+
+                    <div class="col-md-2">
+                        <button class="btn btn-primary w-100"
+                                id="loadBulkEntries">
+                            Load
+                        </button>
+                    </div>
+
+                </div>
+
+                <form method="POST"
+                      action="{{ route('game-entry.bulk-update') }}">
+
+                    @csrf
+
+                    {{-- CHANGE FOR ALL --}}
+                    <div class="row mb-3">
+
+                        <div class="col-md-6">
+                            <label>Change Agent For Selected</label>
+
+                            <select name="agent_id"
+                                    class="form-select">
+
+                                <option value="">Select Agent</option>
+
+                                @foreach($agents as $agent)
+                                    <option value="{{ $agent->id }}">
+                                        {{ $agent->name }}
+                                    </option>
+                                @endforeach
+
+                            </select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label>Change Baji For Selected</label>
+
+                            <select name="baji_id"
+                                    class="form-select">
+
+                                <option value="">Select Baji</option>
+
+                                @foreach($bajis as $baji)
+                                    <option value="{{ $baji->id }}">
+                                        {{ $baji->name }}
+                                    </option>
+                                @endforeach
+
+                            </select>
+                        </div>
+
+                    </div>
+
+                    {{-- ENTRY LIST --}}
+                    <div class="table-responsive border rounded"
+                        style="max-height: 500px; overflow-y: auto;">
+
+                        <table class="table table-bordered table-hover mb-0">
+
+                            <thead class="table-light sticky-top">
+                                <tr>
+                                    <th width="50">
+                                        <input type="checkbox" id="checkAll">
+                                    </th>
+                                    <th>Time</th>
+                                    <th>Agent</th>
+                                    <th>Baji</th>
+                                    <th>Number</th>
+                                    <th>Amount</th>
+                                </tr>
+                            </thead>
+
+                            <tbody id="bulkTableBody">
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                    <button class="btn btn-success">
+                        Update Selected Entries
+                    </button>
+
+                </form>
+
+            </div>
+
+        </div>
+    </div>
+</div>
 @endsection
 
 @section('script')
@@ -618,5 +747,79 @@
         let canvas = new bootstrap.Offcanvas('#editEntryCanvas');
         canvas.show();
     });
+</script>
+
+<script>
+
+    $('#loadBulkEntries').click(function () {
+
+        let from = $('#bulk_from').val();
+        let to   = $('#bulk_to').val();
+
+        $.get("{{ route('game-entry.bulk-list') }}", {
+            from: from,
+            to: to
+        }, function (res) {
+
+            let html = '';
+
+            res.forEach(function (item) {
+
+                html += `
+                    <tr>
+
+                        <td>
+                            <input type="checkbox"
+                                name="entry_ids[]"
+                                value="${item.id}"
+                                checked>
+                        </td>
+
+                        <td>
+                            ${new Date(item.created_at).toLocaleString('en-IN', {
+                                day: '2-digit',
+                                month: 'short',
+                                year: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit',
+                                hour12: true
+                            })}
+                        </td>
+
+                        <td>
+                            ${item.agent?.name ?? ''}
+                        </td>
+
+                        <td>
+                            ${item.baji?.name ?? ''}
+                        </td>
+
+                        <td>
+                            ${item.game_number}
+                        </td>
+
+                        <td>
+                            ₹${item.amount}
+                        </td>
+
+                    </tr>
+                `;
+            });
+
+            $('#bulkTableBody').html(html);
+
+        });
+
+    });
+
+
+    // CHECK ALL
+    $(document).on('change', '#checkAll', function () {
+
+        $('input[name="entry_ids[]"]')
+            .prop('checked', $(this).prop('checked'));
+
+    });
+
 </script>
 @endsection
