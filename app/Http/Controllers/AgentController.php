@@ -26,12 +26,12 @@ class AgentController extends Controller implements HasMiddleware
         if (auth()->user()->hasRole('Super Admin')) {
             $agents = Agent::with('Employee')
                 ->latest()
-                ->paginate(15);
+                ->get();
         } else {
             $agents = Agent::with('Employee')
                 ->where('employee_id', auth()->id())
                 ->latest()
-                ->paginate(15);
+                ->get();
         }
 
         return view('agents.index', compact('agents'));

@@ -29,7 +29,7 @@
             <tbody>
                 @foreach($agents as $key=>$agent)
                 <tr>
-                    <td>{{ $agents->firstItem()+$key }}</td>
+                    <td>{{ $loop->iteration }}</td>
                     <td>{{ $agent->name }}</td>
                     <td>{{ $agent->employee->name }}</td>
                     <td>{{ $agent->phone }}</td>
@@ -62,7 +62,6 @@
             </tbody>
         </table>
 
-        {{ $agents->links() }}
 
         </div>
     </div>
