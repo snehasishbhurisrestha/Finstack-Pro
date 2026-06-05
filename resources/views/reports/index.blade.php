@@ -230,7 +230,9 @@
                                 </tr>
                             </thead>
                             <tbody>
+                                @php $amountSum = 0; @endphp
                                 @forelse($entries as $entry)
+                                    @php $amountSum += $entry->amount; @endphp
                                     <tr>
                                         <td>{{ $entry->created_at->format('d M h:i A') }}</td>
                                         <td>{{ $entry->agent->name ?? '-' }}</td>
@@ -248,6 +250,13 @@
                                     </tr>
                                 @endforelse
                             </tbody>
+                            <tfoot>
+                                <tr>
+                                    <th colspan="4" class="text-end">Total Amount:</th>
+                                    <th>₹{{ number_format($amountSum, 2) }}</th>
+                                    <th colspan="2"></th>
+                                </tr>
+                            </tfoot>
                         </table>
                     </div>
 
