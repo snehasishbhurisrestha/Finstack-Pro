@@ -70,14 +70,15 @@ class GameEntryController extends Controller implements HasMiddleware
         DB::beginTransaction();
 
         try {
+        
 
             foreach ($request->numbers as $index => $numberLine) {
 
                 $amount = $request->amounts[$index] ?? null;
 
-                if (!$numberLine || !$amount) {
-                    continue;
-                }
+                // if (!$numberLine || !$amount) {
+                //     continue;
+                // }
 
                 $amount = (float)$amount;
 
