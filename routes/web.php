@@ -13,6 +13,7 @@ use App\Http\Controllers\{
     ReportController,
     ResultController,
     AnalyticsController,
+    PattiCheckController,
 };
 
 Route::get('/', function () {
@@ -47,6 +48,11 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/reports/patti', [AnalyticsController::class, 'pattiReport'])->name('reports.patti');
     Route::get('/reports/patti/agent-details',[AnalyticsController::class, 'pattiAgentDetails'])->name('reports.patti.agent.details');
+
+    Route::get('/patti-check', [PattiCheckController::class, 'index'])->name('patti-check.index');
+    Route::get('/patti-check/details',[PattiCheckController::class, 'details'])->name('patti-check.details');
+    Route::get('/patti-check/create', [PattiCheckController::class, 'store_index'])->name('patti-check.create');
+    Route::post('/patti-check/store', [PattiCheckController::class, 'store'])->name('patti-check.store');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
