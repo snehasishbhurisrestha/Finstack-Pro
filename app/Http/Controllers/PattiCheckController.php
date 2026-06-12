@@ -28,6 +28,7 @@ class PattiCheckController extends Controller implements HasMiddleware
 
         $pattis = PattiCheck::select('single', 'patti')
             ->orderBy('single')
+            ->orderByRaw('CAST(patti AS UNSIGNED) ASC')
             ->get()
             ->groupBy('single');
 
@@ -47,6 +48,8 @@ class PattiCheckController extends Controller implements HasMiddleware
 
             if ($request->filled('date')) {
                 $query->whereDate('created_at', $request->date);
+            }else{
+                $query->whereDate('created_at', now());
             }
 
             $amountData = $query
@@ -77,6 +80,8 @@ class PattiCheckController extends Controller implements HasMiddleware
 
             if ($request->filled('date')) {
                 $summaryQuery->whereDate('created_at', $request->date);
+            }else{
+                $summaryQuery->whereDate('created_at', now());
             }
 
             $summary['total_amount'] = (clone $summaryQuery)->sum('amount');
