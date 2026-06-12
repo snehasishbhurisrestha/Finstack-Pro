@@ -26,6 +26,19 @@ class PattiCheckController extends Controller implements HasMiddleware
     {
         $bajis = Baji::orderBy('id')->get();
 
+        $user = auth()->user();
+
+        if ($user->hasRole('Super Admin')) {
+            $agents = Agent::where('status', 1)
+                ->orderBy('name')
+                ->get();
+        } else {
+            $agents = Agent::where('employee_id', $user->id)
+                ->where('status', 1)
+                ->orderBy('name')
+                ->get();
+        }
+
         $pattis = PattiCheck::select('single', 'patti')
             ->orderBy('single')
             ->orderByRaw('CAST(patti AS UNSIGNED) ASC')
@@ -37,13 +50,17 @@ class PattiCheckController extends Controller implements HasMiddleware
         $amountData = [];
 
         // Only run when filter submitted
-        if ($request->filled('baji_id') || $request->filled('date')) {
+        if ($request->filled('baji_id') || $request->filled('date') || $request->filled('agent_id')) {
 
             $query = GameEntry::query()
                 ->whereRaw('CHAR_LENGTH(game_number) = 3');
 
             if ($request->filled('baji_id')) {
                 $query->where('baji_id', $request->baji_id);
+            }
+
+            if ($request->filled('agent_id')) {
+                $query->where('agent_id', $request->agent_id);
             }
 
             if ($request->filled('date')) {
@@ -69,13 +86,17 @@ class PattiCheckController extends Controller implements HasMiddleware
             'highest'      => null,
         ];
 
-        if ($request->filled('baji_id') || $request->filled('date')) {
+        if ($request->filled('baji_id') || $request->filled('date') || $request->filled('agent_id')) {
 
             $summaryQuery = GameEntry::query()
                 ->whereRaw('CHAR_LENGTH(game_number) = 3');
 
             if ($request->filled('baji_id')) {
                 $summaryQuery->where('baji_id', $request->baji_id);
+            }
+
+            if ($request->filled('agent_id')) {
+                $summaryQuery->where('agent_id', $request->agent_id);
             }
 
             if ($request->filled('date')) {
@@ -107,7 +128,8 @@ class PattiCheckController extends Controller implements HasMiddleware
             'pattis',
             'maxRows',
             'amountData',
-            'summary'
+            'summary',
+            'agents'
         ));
     }
 

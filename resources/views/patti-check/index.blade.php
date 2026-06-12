@@ -36,6 +36,17 @@
                     </div>
 
                     <div class="col-lg-2 col-md-4 col-6">
+                        <select name="agent_id" class="form-select">
+                            <option value="">All Agent</option>
+                            @foreach($agents as $agent)
+                                <option value="{{ $agent->id }}" {{ old('agent_id', request('agent_id')) == $agent->id ? 'selected' : '' }}>
+                                    {{ $agent->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="col-lg-2 col-md-4 col-6">
                         <button class="btn btn-primary w-100">
                             Filter
                         </button>
