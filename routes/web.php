@@ -36,6 +36,8 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/game-entry/bulk-list', [GameEntryController::class, 'bulkList'])->name('game-entry.bulk-list');
     Route::post('/game-entry/bulk-update', [GameEntryController::class, 'bulkUpdate'])->name('game-entry.bulk-update');
+    Route::post('/agent-green/toggle', [GameEntryController::class, 'toggle'])->name('agent-green.toggle');
+    Route::get('/agent-green-status', [GameEntryController::class, 'status'])->name('agent-green.status');
 
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
 

@@ -72,6 +72,24 @@
         }
     }
 </style>
+
+<style>
+.agent-corner-checkbox{
+    position: absolute;
+    top: 5px;
+    right: 20px;
+    z-index: 10;
+}
+.green-card{
+    background: #28a745 !important;
+    color: #fff !important;
+    border-color: #28a745 !important;
+}
+
+.green-card *{
+    color: #fff !important;
+}
+</style>
 @endsection
 
 @section('content')
@@ -96,7 +114,7 @@
                     <div class="col-lg-4 col-md-4">
                         <div class="soft-box">
                             <label class="fw-bold mb-2">Baji</label>
-                            <select name="baji" class="form-select">
+                            <select name="baji" class="form-select" id="baji_id" required>
                                 @foreach($bajis as $baji)
                                     <option value="{{ $baji->id }}">
                                         {{ $baji->name }} - {{ $baji->end_time }}
@@ -112,14 +130,15 @@
 
                             <div class="row mobile-scroll">
                                 @foreach($agents as $agent)
-                                <div class="col-lg-2 col-md-3 col-6 mb-2">
-                                    <label class="select-card">
+                                <div class="col-lg-2 col-md-3 col-6 mb-2 position-relative">
+                                    <label class="select-card agent-card">
                                         <input type="radio"
                                                name="agent_id"
                                                value="{{ $agent->id }}"
                                                required>
                                         {{ $agent->name }}
                                     </label>
+                                    <input type="checkbox" name="agent_id[]" value="{{ $agent->id }}" class="agent-corner-checkbox">
                                 </div>
                                 @endforeach
                             </div>
@@ -821,5 +840,76 @@
 
     });
 
+</script>
+
+<script>
+    $(document).on('change', '.agent-corner-checkbox', function() {
+
+        let card = $(this).siblings('.agent-card');
+
+        if ($(this).is(':checked')) {
+            card.addClass('green-card');
+        } else {
+            card.removeClass('green-card');
+        }
+
+    });
+
+    $(document).on('change', '.agent-corner-checkbox', function () {
+
+        let checkbox = $(this);
+        let card = checkbox.siblings('.agent-card');
+
+        $.ajax({
+            url: "{{ route('agent-green.toggle') }}",
+            type: "POST",
+            data: {
+                _token: "{{ csrf_token() }}",
+                agent_id: checkbox.val(),
+                baji_id: $('#baji_id').val(), // selected baji
+                status: checkbox.is(':checked') ? 1 : 0
+            },
+            success: function () {
+
+                if (checkbox.is(':checked')) {
+                    card.addClass('green-card');
+                } else {
+                    card.removeClass('green-card');
+                }
+            }
+        });
+    });
+
+    function loadGreenAgents()
+    {
+        let bajiId = $('#baji_id').val();
+
+        $('.agent-corner-checkbox').prop('checked', false);
+        $('.agent-card').removeClass('green-card');
+
+        $.get('/agent-green-status', {
+            baji_id: bajiId
+        }, function(agentIds) {
+
+            agentIds.forEach(function(id) {
+
+                let checkbox = $('.agent-corner-checkbox[value="'+id+'"]');
+
+                checkbox.prop('checked', true);
+
+                checkbox.siblings('.agent-card')
+                        .addClass('green-card');
+            });
+
+        });
+    }     
+    
+    $(document).ready(function() {
+        loadGreenAgents();
+    });
+
+    $('#baji_id').on('change', function() {
+        loadGreenAgents();
+    });
 </script>
 @endsection

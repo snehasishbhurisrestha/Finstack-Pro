@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Agent;
 use App\Models\Baji;
 use App\Models\GameEntry;
+use App\Models\AgentGreen;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -206,5 +207,39 @@ class GameEntryController extends Controller implements HasMiddleware
             'success',
             count($request->entry_ids) . ' entries updated successfully'
         );
+    }
+
+
+    public function toggle(Request $request)
+    {
+        if ($request->status) {
+
+            AgentGreen::firstOrCreate([
+                'agent_id' => $request->agent_id,
+                'baji_id'  => $request->baji_id,
+            ],[
+                'is_win' => 1
+            ]);
+
+        } else {
+
+            AgentGreen::where('agent_id', $request->agent_id)
+                ->where('baji_id', $request->baji_id)
+                ->whereDate('created_at', today())
+                ->delete();
+        }
+
+        return response()->json([
+            'success' => true
+        ]);
+    }
+
+    public function status(Request $request)
+    {
+        $agentIds = AgentGreen::where('baji_id', $request->baji_id)
+            ->whereDate('created_at', today())
+            ->pluck('agent_id');
+
+        return response()->json($agentIds);
     }
 }
