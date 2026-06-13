@@ -48,7 +48,7 @@
 
                         <form action="{{ route('agents.destroy',$agent->id) }}"
                             method="POST"
-                            class="d-inline">
+                            class="d-inline delete-form">
                             @csrf
                             @method('DELETE')
 
@@ -67,4 +67,37 @@
     </div>
 
 </div>
+@endsection
+
+@section('script')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    document.querySelectorAll('.delete-form').forEach(form => {
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to recover this agent!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, delete it!',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+
+            });
+        });
+
+    });
+
+});
+</script>
 @endsection

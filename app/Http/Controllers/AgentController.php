@@ -4,7 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Agent;
 use App\Models\User;
+use App\Models\GameEntry;
+use App\Models\AgentGreen;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
@@ -117,13 +120,28 @@ class AgentController extends Controller implements HasMiddleware
             ->with('success','Agent updated successfully');
     }
 
+    // public function destroy($id)
+    // {
+    //     Agent::findOrFail($id)->delete();
+
+    //     return back()->with(
+    //         'success',
+    //         'Agent deleted successfully'
+    //     );
+    // }
+
     public function destroy($id)
     {
-        Agent::findOrFail($id)->delete();
+        DB::transaction(function () use ($id) {
 
-        return back()->with(
-            'success',
-            'Agent deleted successfully'
-        );
+            // Delete child records first
+            GameEntry::where('agent_id', $id)->delete();
+            AgentGreen::where('agent_id', $id)->delete();
+
+            // Delete agent
+            Agent::where('id', $id)->delete();
+        });
+
+        return back()->with('success', 'Agent deleted successfully');
     }
 }

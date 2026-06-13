@@ -138,7 +138,7 @@
                                                required>
                                         {{ $agent->name }}
                                     </label>
-                                    <input type="checkbox" name="agent_id[]" value="{{ $agent->id }}" class="agent-corner-checkbox">
+                                    <input type="checkbox" name="agent_ids[]" value="{{ $agent->id }}" class="agent-corner-checkbox">
                                 </div>
                                 @endforeach
                             </div>
